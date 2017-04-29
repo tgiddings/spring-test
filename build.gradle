@@ -1,0 +1,113 @@
+import org.apache.tools.ant.DefaultLogger
+
+group 'com.robocubs4205'
+version '0.0.1'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE")
+        classpath('com.h2database:h2:1.4.193')
+        classpath('org.springframework.boot:spring-boot-starter-security:1.5.2.RELEASE')
+        classpath('org.datanucleus:datanucleus-rdbms:5.1.0-m1')
+    }
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+static int gradleLogLevelToAnt(LogLevel level){
+    switch(level){
+        case LogLevel.DEBUG:
+        return org.apache.tools.ant.Project.MSG_DEBUG
+        case LogLevel.ERROR:
+        case LogLevel.QUIET:
+            return org.apache.tools.ant.Project.MSG_ERR
+        case LogLevel.INFO:
+        case LogLevel.LIFECYCLE:
+            return org.apache.tools.ant.Project.MSG_INFO
+        case LogLevel.WARN:
+            return org.apache.tools.ant.Project.MSG_WARN
+        default:
+            return org.apache.tools.ant.Project.MSG_WARN
+    }
+}
+
+task datanucleusEnhance {
+    description "Enhance JPA model classes using DataNucleus Enhancer"
+    dependsOn compileJava
+
+    doLast {
+        // define the entity classes
+        def entityFiles = fileTree(sourceSets.main.output.classesDir)
+
+        // define Ant task for DataNucleus Enhancer
+        ant.taskdef(
+                name: 'datanucleusenhancer',
+                classpath: sourceSets.main.runtimeClasspath.asPath,
+                classname: 'org.datanucleus.enhancer.EnhancerTask'
+        )
+
+        def buffer = new ByteArrayOutputStream()
+        def captureStream = new PrintStream(buffer, true, "UTF-8")
+        def listener = new DefaultLogger(
+                errorPrintStream: captureStream,
+                outputPrintStream: captureStream,
+                messageOutputLevel: gradleLogLevelToAnt(logging.level)
+        )
+
+        ant.project.addBuildListener(listener)
+
+        // run the DataNucleus Enhancer as an Ant task
+        ant.datanucleusenhancer(
+                classpath: sourceSets.main.runtimeClasspath.asPath,
+                verbose: true,
+                api: "JDO") {
+            entityFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+        }
+
+        ant.project.removeBuildListener(listener)
+
+        System.out.print(buffer.toString("UTF-8"))
+    }
+}
+
+classes.dependsOn datanucleusEnhance
+
+war{
+    baseName="cubscout-rest"
+    doFirst {
+        manifest {
+            attributes("Implementation-Title": 'com.robocubs4205.cubscout-rest', "Implementation-Version": version, "Implementation-Timestamp": new Date())
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.datanucleus:datanucleus-api-jdo:5.1.0-m1'
+    compile 'org.datanucleus:datanucleus-core:5.1.0-m1'
+    compile 'org.datanucleus:javax.jdo:3.2.0-m6'
+    compile 'org.datanucleus:datanucleus-rdbms:5.1.0-m1'
+
+    compile 'com.h2database:h2:1.4.193'
+
+    compile 'org.jhades:jhades:1.0.4'
+    
+    compile 'org.springframework.boot:spring-boot-gradle-plugin:1.3.5.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.1.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-tomcat:1.5.1.RELEASE'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:1.5.1.RELEASE'
+}
+
+
+
