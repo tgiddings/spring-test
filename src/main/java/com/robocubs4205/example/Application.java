@@ -2,9 +2,7 @@ package com.robocubs4205.example;
 
 import com.robocubs4205.example.model.*;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
-import org.datanucleus.enhancer.EnhancerTask;
 import org.datanucleus.metadata.PersistenceUnitMetaData;
-import org.datanucleus.store.StoreManager;
 import org.h2.server.web.WebServlet;
 import org.jhades.JHades;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +13,11 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
@@ -62,18 +61,37 @@ public class Application extends SpringBootServletInitializer {
 
     @Component
     class InitBean {
-        private final PersistenceManagerFactory pmf;
+        private final ARepository aRepository;
 
         @Autowired
-        InitBean(PersistenceManagerFactory pmf) {
-            this.pmf = pmf;
-            PersistenceManager pm = pmf.getPersistenceManager();
+        InitBean(PersistenceManagerFactory pmf, ARepository aRepository) {
+            this.aRepository = aRepository;
             A a = new A();
-            pm.makePersistent(a);
-            pm.makePersistent(new B());
-            pm.makePersistent(new C());
-            pm.makePersistent(new D());
-            pm.makePersistent(new E());
+            aRepository.save(a);
+            aRepository.save(new B());
+            aRepository.save(Arrays.asList(new C(), new D(), new E()));
+
+            System.out.println(aRepository.findAll());
+
+            aRepository.delete(a);
+
+            System.out.println(aRepository.findAll());
+
+            A a2 = new B();
+            a2.id = 2;
+
+            aRepository.delete(a2);
+
+            System.out.println(aRepository.findAll());
+
+            A a3 = new B();
+            a3.id = 27;
+
+            aRepository.delete(a3);
+
+            System.out.println(aRepository.findAll());
+
+            System.out.println(aRepository.findOne(4L));
         }
     }
 }

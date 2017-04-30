@@ -89,11 +89,33 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/org.datanucleus/datanucleus-rdbms/5.1.0-m1/76e04f965197b422c9f5e9f69924a3c189c5252e/datanucleus-rdbms-5.1.0-m1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES>
+          <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/org.datanucleus/datanucleus-rdbms/5.1.0-m1/9fca61d46dfee2a7544f156b3a2b177532736490/datanucleus-rdbms-5.1.0-m1-sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/com.h2database/h2/1.4.193/369b51e2090c4e6714d9d5e42010b6330c2cea26/h2-1.4.193.jar!/"/>
         </CLASSES>
         <JAVADOC/>
         <SOURCES>
           <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/com.h2database/h2/1.4.193/69830aec064c1a12515981c0d098ade204951478/h2-1.4.193-sources.jar!/"/>
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/org.jhades/jhades/1.0.4/5c34aa4a2aae65edfca348d4df6c8e59581a8d/jhades-1.0.4.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES>
+          <root url="jar:///home/trevor/.gradle/caches/modules-2/files-2.1/org.jhades/jhades/1.0.4/3c855caf7834033b9e10c626cab32f020081a875/jhades-1.0.4-sources.jar!/"/>
         </SOURCES>
       </library>
     </orderEntry>
