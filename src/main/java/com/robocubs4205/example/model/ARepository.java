@@ -21,27 +21,21 @@ public class ARepository implements CrudRepository<A, Long> {
     @Override
     public <S extends A> S save(S entity) {
         if (entity == null) throw new IllegalArgumentException("entity must not be null");
-        return doTransactional((pm, tx) -> {
+        try(PersistenceManager pm = pmf.getPersistenceManager()){
+            boolean tx = pm.currentTransaction().isActive();
             return pm.makePersistent(entity);
-        });
+        }
+        /*return doTransactional((pm, tx) -> {
+            return pm.makePersistent(entity);
+        });*/
     }
 
     @Override
     public <S extends A> Iterable<S> save(Iterable<S> entities) {
         if (entities == null) throw new IllegalArgumentException("entities iterable must not be null");
         return doTransactional((pm, tx) -> {
-            List<S> as = new ArrayList<>();
-            entities.forEach(entity -> {
-                pm.makePersistent(entity);
-                /*
-                makePersistent may modify tables, which is not possible if uncommitted changes to the
-                table's rows exist
-                 */
-                tx.commit();
-                tx.begin();
-                as.add(entity);
-            });
-            return as;
+            return pm.makePersistentAll(StreamSupport.stream(entities.spliterator(),false)
+                                                     .collect(Collectors.toList()));
         });
     }
 
@@ -49,12 +43,7 @@ public class ARepository implements CrudRepository<A, Long> {
     public A findOne(Long id) {
         if (id == null) throw new IllegalArgumentException("id must not be null");
         return doTransactional((pm, tx) -> {
-            A a = (A) pm.newQuery(A.class)
-                              .filter("this.id==:id")
-                              .setParameters(id)
-                              .executeUnique();
-            System.out.println(a.getClass().getSimpleName());
-            return (A) a;
+            return pm.getObjectById(A.class,id);
         });
     }
 
@@ -71,8 +60,7 @@ public class ARepository implements CrudRepository<A, Long> {
     @Override
     public Iterable<A> findAll() {
         return doTransactional((pm, tx) -> {
-            Query<A> q = pm.newQuery(A.class);
-            return q.executeList();
+            return pm.newQuery(A.class).executeList();
         });
 
     }
@@ -83,10 +71,10 @@ public class ARepository implements CrudRepository<A, Long> {
         return doTransactional((pm, tx) -> {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("ids", ids);
-            Query<A> q = pm.newQuery(A.class)
-                           .filter(":ids.contains(id)")
-                           .setNamedParameters(parameters);
-            return q.executeList();
+            return pm.newQuery(A.class)
+                     .filter(":ids.contains(id)")
+                     .setNamedParameters(parameters)
+                     .executeList();
         });
     }
 
@@ -150,9 +138,7 @@ public class ARepository implements CrudRepository<A, Long> {
     @Override
     public void deleteAll() {
         doTransactional((pm, tx) -> {
-            Query<A> q = pm.newQuery(A.class);
-
-            q.deletePersistentAll();
+            pm.newQuery(A.class).deletePersistentAll();
         });
     }
 

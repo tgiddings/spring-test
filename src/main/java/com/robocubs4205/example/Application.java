@@ -5,21 +5,24 @@ import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.datanucleus.metadata.PersistenceUnitMetaData;
 import org.h2.server.web.WebServlet;
 import org.jhades.JHades;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.orm.jdo.JdoTransactionManager;
+import org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @SpringBootApplication
+@EnableTransactionManagement
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
@@ -27,7 +30,7 @@ public class Application extends SpringBootServletInitializer {
     }
 
     @Bean
-    PersistenceManagerFactory pmf() {
+    FactoryBean<PersistenceManagerFactory> pmf() {
 
         new JHades().findClassByName("org.datanucleus.store.rdbms.RDBMSStoreManager");
 
@@ -46,10 +49,12 @@ public class Application extends SpringBootServletInitializer {
                          "jdbc:h2:mem:testdb");
         pumd.addProperty("javax.jdo.option.ConnectionDriverName", "org.h2.Driver");
         pumd.addProperty("javax.jdo.option.ConnectionUserName", "sa");
-        pumd.addProperty("datanucleus.schema.autoCreateTables", "true");
-        pumd.addProperty("datanucleus.schema.autoCreateColumns", "true");
+        pumd.addProperty("datanucleus.generateSchema.database.mode","create");
 
-        return new JDOPersistenceManagerFactory(pumd, null);
+        TransactionAwarePersistenceManagerFactoryProxy pmf = new TransactionAwarePersistenceManagerFactoryProxy();
+        pmf.setTargetPersistenceManagerFactory(new JDOPersistenceManagerFactory(pumd, null));
+
+        return pmf;
     }
 
     @Bean
@@ -59,39 +64,17 @@ public class Application extends SpringBootServletInitializer {
         return bean;
     }
 
+    @Bean
+    JdoTransactionManager tm(PersistenceManagerFactory pmf){
+        return new JdoTransactionManager(pmf);
+    }
+
     @Component
     class InitBean {
-        private final ARepository aRepository;
 
         @Autowired
-        InitBean(PersistenceManagerFactory pmf, ARepository aRepository) {
-            this.aRepository = aRepository;
-            A a = new A();
-            aRepository.save(a);
-            aRepository.save(new B());
-            aRepository.save(Arrays.asList(new C(), new D(), new E()));
-
-            System.out.println(aRepository.findAll());
-
-            aRepository.delete(a);
-
-            System.out.println(aRepository.findAll());
-
-            A a2 = new B();
-            a2.id = 2;
-
-            aRepository.delete(a2);
-
-            System.out.println(aRepository.findAll());
-
-            A a3 = new B();
-            a3.id = 27;
-
-            aRepository.delete(a3);
-
-            System.out.println(aRepository.findAll());
-
-            System.out.println(aRepository.findOne(4L));
+        InitBean(PersistenceManagerFactory pmf, ARepository aRepository, AService aService) {
+            aService.foo();
         }
     }
 }

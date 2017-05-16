@@ -11,7 +11,8 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE")
         classpath('com.h2database:h2:1.4.193')
         classpath('org.springframework.boot:spring-boot-starter-security:1.5.2.RELEASE')
-        classpath('org.datanucleus:datanucleus-rdbms:5.1.0-m1')
+        classpath('org.datanucleus:datanucleus-rdbms:5.1.0-m2')
+        //classpath(files('datanucleus-rdbms-5.1.0-m3-20170430.063424-1.jar'))
     }
 }
 
@@ -91,13 +92,19 @@ war{
 
 repositories {
     jcenter()
+    flatDir{
+        dirs 'localDependencies'
+    }
 }
 
 dependencies {
-    compile 'org.datanucleus:datanucleus-api-jdo:5.1.0-m1'
-    compile 'org.datanucleus:datanucleus-core:5.1.0-m1'
+    compile 'org.datanucleus:datanucleus-api-jdo:5.1.0-m2'
+    //compile files('localDependencies/datanucleus-api-jdo-5.1.0-m3-20170430.062634-1.jar')
+    compile 'org.datanucleus:datanucleus-core:5.1.0-m2'
+    //compile files('localDependencies/datanucleus-core-5.1.0-m3-20170430.062424-1.jar')
     compile 'org.datanucleus:javax.jdo:3.2.0-m6'
-    compile 'org.datanucleus:datanucleus-rdbms:5.1.0-m1'
+    compile 'org.datanucleus:datanucleus-rdbms:5.1.0-m2'
+    //compile files('localDependencies/datanucleus-rdbms-5.1.0-m3-20170430.063424-1.jar')
 
     compile 'com.h2database:h2:1.4.193'
 
@@ -107,6 +114,8 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:1.5.1.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-tomcat:1.5.1.RELEASE'
     compile 'org.springframework.data:spring-data-commons-core:1.4.1.RELEASE'
+    compile 'org.springframework:spring-tx:4.3.8.RELEASE'
+    compile 'org.springframework:spring-orm:4.3.8.RELEASE'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:1.5.1.RELEASE'
 }
 
