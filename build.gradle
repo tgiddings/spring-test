@@ -82,7 +82,6 @@ task datanucleusEnhance {
 classes.dependsOn datanucleusEnhance
 
 war{
-    baseName="cubscout-rest"
     doFirst {
         manifest {
             attributes("Implementation-Title": 'com.robocubs4205.cubscout-rest', "Implementation-Version": version, "Implementation-Timestamp": new Date())
